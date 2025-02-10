@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Charges</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 50%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 15px;
+            border-radius: 8px;
+            background: #f1f1f1;
+            margin: 10px 0;
+            font-size: 18px;
+            transition: 0.3s ease-in-out;
+        }
+        li:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestion des Charges</h1>
+        <h2 id="week-number"></h2>
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        function getWeekNumber() {
+            const now = new Date('2025-02-24');
+            const start = new Date(now.getFullYear(), 0, 1);
+            const diff = now - start;
+            const oneWeek = 7 * 24 * 60 * 60 * 1000;
+            return Math.floor(diff / oneWeek) % 4 + 1;
+        }
+
+        const tasks = {
+            1: {"Sarah": "Débarasser lave-vaisselle", "Louis": "Mettre la table", "Charlotte": "Nourrir les animaux", "Thomas": "Débarasser la table"},
+            2: {"Sarah": "Débarasser la table", "Louis": "Débarasser lave-vaisselle", "Charlotte": "Mettre la table", "Thomas": "Nourrir les animaux"},
+            3: {"Sarah": "Nourrir les animaux", "Louis": "Débarasser la table", "Charlotte": "Débarasser lave-vaisselle", "Thomas": "Mettre la table"},
+            4: {"Sarah": "Mettre la table", "Louis": "Nourrir les animaux", "Charlotte": "Débarasser la table", "Thomas": "Débarasser lave-vaisselle"}
+        };
+
+        function updateTasks() {
+            const weekNumber = getWeekNumber();
+            document.getElementById("week-number").textContent = "Semaine " + weekNumber;
+            const taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+            
+            for (const [person, task] of Object.entries(tasks[weekNumber])) {
+                const li = document.createElement("li");
+                li.textContent = `${person} - ${task}`;
+                taskList.appendChild(li);
+            }
+        }
+
+        updateTasks();
+    </script>
+</body>
+</html>
