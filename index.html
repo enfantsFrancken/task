@@ -1,86 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion des Charges</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
-            background-color: #f8f9fa;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            width: 50%;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        h2 {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            padding: 15px;
-            border-radius: 8px;
-            background: #f1f1f1;
-            margin: 10px 0;
-            font-size: 18px;
-            transition: 0.3s ease-in-out;
-        }
-        li:hover {
-            background: #e0e0e0;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tâches de la semaine — Planning rotatif</title>
+  <style>
+    :root{
+      --bg-dark:#0f1724; --card-dark:#0b1220; --text-dark:#e6eef8; --muted-dark:#94a3b8; --accent:#60a5fa;
+      --bg-light:#f6f8fb; --card-light:#ffffff; --text-light:#0b1220; --muted-light:#6b7280; 
+    }
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,var(--bg-dark) 0%, #081428 60%); color:var(--text-dark); display:flex; align-items:center; justify-content:center; padding:32px; transition:all .25s ease;
+    }
+    body.light{background:linear-gradient(180deg,var(--bg-light) 0%, #eef2f7 60%); color:var(--text-light);} 
+
+    .wrap{width:100%;max-width:980px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px}
+    h1{font-size:1.3rem;margin:0}
+    .sub{color:var(--muted-dark);font-size:0.92rem}
+    body.light .sub{color:var(--muted-light)}
+
+    .card{background:var(--card-dark);padding:18px;border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.45);backdrop-filter:blur(6px);transition:background .25s ease}
+    body.light .card{background:var(--card-light);box-shadow:0 6px 18px rgba(15,23,36,0.06)}
+
+    .grid{display:grid;grid-template-columns:1fr 300px;gap:20px}
+
+    table{width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden}
+    thead th{padding:12px 16px;text-align:left;font-weight:600;color:var(--muted-dark);font-size:0.88rem;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+    body.light thead th{color:var(--muted-light);background:transparent}
+    tbody td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    body.light tbody td{border-bottom:1px solid rgba(15,23,36,0.04)}
+
+    tbody tr{background:linear-gradient(90deg, rgba(255,255,255,0.01), transparent)}
+    body.light tbody tr{background:transparent}
+
+    .person{font-weight:700}
+    .task{font-size:0.98rem;opacity:0.95}
+
+    .controls{display:flex;flex-direction:column;gap:12px}
+    .actions{display:flex;gap:8px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:10px;color:inherit;cursor:pointer;font-weight:600}
+    body.light button{border:1px solid rgba(15,23,36,0.06)}
+
+    .pill{display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+    body.light .pill{background:rgba(2,6,23,0.03)}
+
+    .week-pill{font-size:0.95rem}
+
+    .big-card{padding:20px;border-radius:16px}
+    .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+    .legend{display:flex;gap:8px;flex-wrap:wrap}
+    .legend .item{font-size:0.85rem;color:var(--muted-dark)}
+    body.light .legend .item{color:var(--muted-light)}
+
+    .accent{color:var(--accent)}
+
+    @media (max-width:880px){.grid{grid-template-columns:1fr;}.header-row{flex-direction:column;align-items:flex-start;gap:6px}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Gestion des Charges</h1>
-        <h2 id="week-number"></h2>
-        <ul id="task-list"></ul>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Planning des tâches — semaine</h1>
+        <div class="sub">Rotation hebdomadaire — changement : lundi à 00:00 (heure locale)</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="pill week-pill" id="weekInfo">...</div>
+        <button id="themeToggle" title="Basculer thème">🌙 / ☀️</button>
+      </div>
+    </header>
+
+    <div class="card big-card grid">
+      <section>
+        <div class="header-row" style="margin-bottom:10px">
+          <div style="font-weight:700">Affectations</div>
+          <div class="legend"><div class="item">Personnes: <strong>Sarah, Louis, Charlotte, Thomas</strong></div><div class="item">Tâches: <strong>Mettre la table · Animaux · Débarasser la table · Débarasser le lave-vaisselle</strong></div></div>
+        </div>
+
+        <table aria-label="planning-taches">
+          <thead>
+            <tr><th>Personne</th><th>Tâche</th></tr>
+          </thead>
+          <tbody id="assignments">
+            <!-- Rempli par JavaScript -->
+          </tbody>
+        </table>
+      </section>
+
+      <aside class="controls">
+        <div>
+          <div style="margin-bottom:8px;font-weight:700">Navigation</div>
+          <div class="actions" style="margin-bottom:8px">
+            <button id="prevWeek">◀ Semaine précédente</button>
+            <button id="nextWeek">Semaine suivante ▶</button>
+          </div>
+          <div style="margin-bottom:6px"><button id="todayBtn">Revenir à cette semaine</button></div>
+        </div>
+
+        <div style="margin-top:6px;color:var(--muted-dark);font-size:0.9rem">Utilise les boutons pour prévisualiser d'autres semaines. Le calcul est déterministe et local.</div>
+      </aside>
     </div>
+  </div>
 
-    <script>
-        function getWeekNumber() {
-            const now = new Date();
-            const start = new Date(now.getFullYear(), 0, 1);
-            const diff = now - start;
-            const oneWeek = 7 * 24 * 60 * 60 * 1000;
-            return Math.floor(diff / oneWeek) % 4 + 1;
-        }
+  <script>
+    // Données
+    const PEOPLE = ["Sarah","Louis","Charlotte","Thomas"];
+    const TASKS = ["Mettre la table","Animaux","Débarasser la table","Débarasser le lave-vaisselle"]; // orthographe corrigée
 
-        const tasks = {
-            1: {"Sarah": "Débarasser lave-vaisselle", "Louis": "Mettre la table", "Charlotte": "Nourrir les animaux", "Thomas": "Débarasser la table"},
-            2: {"Sarah": "Débarasser la table", "Louis": "Débarasser lave-vaisselle", "Charlotte": "Mettre la table", "Thomas": "Nourrir les animaux"},
-            3: {"Sarah": "Nourrir les animaux", "Louis": "Débarasser la table", "Charlotte": "Débarasser lave-vaisselle", "Thomas": "Mettre la table"},
-            4: {"Sarah": "Mettre la table", "Louis": "Nourrir les animaux", "Charlotte": "Débarasser la table", "Thomas": "Débarasser lave-vaisselle"}
-        };
+    // Semaine-ancre (lundi connu)
+    const ANCHOR_MONDAY = new Date(2020, 0, 6);
 
-        function updateTasks() {
-            const weekNumber = getWeekNumber();
-            document.getElementById("week-number").textContent = "Semaine " + weekNumber;
-            const taskList = document.getElementById("task-list");
-            taskList.innerHTML = "";
-            
-            for (const [person, task] of Object.entries(tasks[weekNumber])) {
-                const li = document.createElement("li");
-                li.textContent = `${person} - ${task}`;
-                taskList.appendChild(li);
-            }
-        }
+    function startOfWeekMonday(date){
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7;
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - day);
+      return d;
+    }
+    function weeksBetween(anchorMonday, targetMonday){
+      const msPerWeek = 7*24*60*60*1000;
+      const delta = startOfWeekMonday(targetMonday) - startOfWeekMonday(anchorMonday);
+      return Math.floor(delta / msPerWeek);
+    }
 
-        updateTasks();
-    </script>
+    function assignmentsForWeek(reference){
+      const weekStart = startOfWeekMonday(new Date(reference));
+      const weekIndex = weeksBetween(ANCHOR_MONDAY, weekStart);
+      const result = [];
+      for(let i=0;i<PEOPLE.length;i++){
+        const taskIndex = (i + weekIndex) % TASKS.length;
+        result.push({person: PEOPLE[i], task: TASKS[taskIndex]});
+      }
+      return {weekStart, weekIndex, result};
+    }
+
+    function renderFor(reference){
+      const {weekStart, weekIndex, result} = assignmentsForWeek(reference);
+      document.getElementById('weekInfo').textContent = `Semaine du ${weekStart.toLocaleDateString('fr-FR')}`;
+
+      const tbody = document.getElementById('assignments');
+      tbody.innerHTML = '';
+      for(const r of result){
+        const tr = document.createElement('tr');
+        const tdP = document.createElement('td'); tdP.className='person'; tdP.textContent = r.person;
+        const tdT = document.createElement('td'); tdT.className='task'; tdT.textContent = r.task;
+        tr.appendChild(tdP); tr.appendChild(tdT);
+        tbody.appendChild(tr);
+      }
+    }
+
+    // Navigation
+    let previewDate = new Date();
+    document.getElementById('prevWeek').addEventListener('click', ()=>{ previewDate.setDate(previewDate.getDate() - 7); renderFor(previewDate); });
+    document.getElementById('nextWeek').addEventListener('click', ()=>{ previewDate.setDate(previewDate.getDate() + 7); renderFor(previewDate); });
+    document.getElementById('todayBtn').addEventListener('click', ()=>{ previewDate = new Date(); renderFor(previewDate); });
+
+    // Thème clair/sombre
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    // initialise selon préférence système
+    const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    if(prefersLight) body.classList.add('light');
+    themeToggle.addEventListener('click', ()=>{ body.classList.toggle('light'); });
+
+    // init
+    renderFor(previewDate);
+  </script>
 </body>
 </html>
